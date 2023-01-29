@@ -3,11 +3,12 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { io } from "socket.io-client";
-import { Card, Typography } from "@mui/material";
+import { Card, InputLabel, Typography } from "@mui/material";
 function Chat() {
   const [socket, setSocket] = useState(null);
   const [msg, setMsg] = useState("");
   const [chat, setChat] = useState([]);
+  const [typing, setTyping] = useState(false);
   useEffect(() => {
     setSocket(io("http://localhost:4000"));
   }, []);
@@ -17,6 +18,12 @@ function Chat() {
     socket.on("msg-from-server", (msg) => {
       setChat((chat) => [...chat, { msg: msg.msg, received: true }]);
     });
+    socket.on("typing-start-from-server", () => {
+      setTyping(true);
+    });
+    socket.on("typing-stop-from-server", () => {
+      setTyping(false);
+    });
   }, [socket]);
 
   function handleForm(e) {
@@ -24,6 +31,21 @@ function Chat() {
     socket.emit("send-msg", { msg });
     setChat((chat) => [...chat, { msg: msg, received: false }]);
     setMsg("");
+  }
+
+  const [typingtimeout, setTypingtimeout] = useState(null);
+
+  function handleInput(e) {
+    setMsg(e.target.value);
+    socket.emit("typing-start");
+
+    if (typingtimeout) clearTimeout(typingtimeout);
+
+    setTypingtimeout(
+      setTimeout(() => {
+        socket.emit("typing-stop");
+      }, 1000)
+    );
   }
 
   return (
@@ -46,12 +68,17 @@ function Chat() {
             autoComplete="off"
             onSubmit={handleForm}
           >
+            {typing && (
+              <InputLabel sx={{ color: "blue" }} shrink htmlFor="msg-inp">
+                typing...
+              </InputLabel>
+            )}
             <TextField
-              id="outlined-basic"
+              id="msg-inp"
               label="Your message"
               variant="outlined"
               value={msg}
-              onChange={(e) => setMsg(e.target.value)}
+              onChange={handleInput}
               fullWidth
             />
             <Button
