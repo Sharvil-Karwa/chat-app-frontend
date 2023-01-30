@@ -4,15 +4,13 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { io } from "socket.io-client";
 import { Card, InputLabel, Typography } from "@mui/material";
+import { useOutletContext, useParams } from "react-router-dom";
 function Chat() {
-  const [socket, setSocket] = useState(null);
   const [msg, setMsg] = useState("");
   const [chat, setChat] = useState([]);
   const [typing, setTyping] = useState(false);
-  useEffect(() => {
-    setSocket(io("http://localhost:4000"));
-  }, []);
-
+  const { socket } = useOutletContext();
+  const { roomId } = useParams();
   useEffect(() => {
     if (!socket) return;
     socket.on("msg-from-server", (msg) => {
@@ -52,6 +50,7 @@ function Chat() {
     <div>
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         <Card sx={{ padding: 2, marginTop: 10, width: "60%" }}>
+          {roomId && <Typography>Room: {roomId}</Typography>}
           <Box sx={{ marginBottom: 5 }}>
             {chat.map((message) => (
               <Typography
