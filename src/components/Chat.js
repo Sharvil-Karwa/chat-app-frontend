@@ -12,6 +12,7 @@ function Chat() {
   const { socket } = useOutletContext();
   const { roomId } = useParams();
   useEffect(() => {
+    console.log(socket);
     if (!socket) return;
     socket.on("msg-from-server", (msg) => {
       setChat((chat) => [...chat, { msg: msg.msg, received: true }]);
@@ -26,7 +27,7 @@ function Chat() {
 
   function handleForm(e) {
     e.preventDefault();
-    socket.emit("send-msg", { msg });
+    socket.emit("send-msg", { msg, roomId });
     setChat((chat) => [...chat, { msg: msg, received: false }]);
     setMsg("");
   }
@@ -35,13 +36,13 @@ function Chat() {
 
   function handleInput(e) {
     setMsg(e.target.value);
-    socket.emit("typing-start");
+    socket.emit("typing-start", { roomId });
 
     if (typingtimeout) clearTimeout(typingtimeout);
 
     setTypingtimeout(
       setTimeout(() => {
-        socket.emit("typing-stop");
+        socket.emit("typing-stop", { roomId });
       }, 1000)
     );
   }
