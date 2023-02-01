@@ -8,10 +8,6 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        path: "/chats",
-        element: <Chat />,
-      },
-      {
         path: "/room/:roomId",
         element: <Room />,
       },
