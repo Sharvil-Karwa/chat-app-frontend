@@ -24,6 +24,10 @@ function Chat() {
     reader.readAsDataURL(file);
     reader.onload = () => {
       socket.emit("send-file", { file: reader.result, roomId });
+      setChat((chat) => [
+        ...chat,
+        { msg: reader.result, received: false, type: "image" },
+      ]);
     };
   }
 
@@ -41,6 +45,7 @@ function Chat() {
         ...chat,
         { msg: file.buffer, received: true, type: "image" },
       ]);
+      console.log(file);
     });
     socket.on("typing-stop-from-server", () => {
       setTyping(false);
@@ -74,14 +79,23 @@ function Chat() {
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         <Card sx={{ padding: 2, marginTop: 10, width: "60%" }}>
           {roomId && <Typography>Room: {roomId}</Typography>}
-          <Box sx={{ marginBottom: 5 }}>
+          <Box
+            sx={{
+              marginBottom: 5,
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              gap: 2,
+            }}
+          >
             {chat.map((message) =>
               message.type === "image" ? (
                 <img
                   src={message.msg}
                   style={{
-                    width: "10%",
-                    float: message.received ? "left" : "right",
+                    width: "30%",
+                    objectFit: "contain",
+                    alignSelf: message.received ? "start" : "end",
                   }}
                 />
               ) : (
