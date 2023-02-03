@@ -19,6 +19,16 @@ function Header({ socket }) {
       setRooms([...rooms, roomId]);
     });
   }, [socket]);
+  useEffect(() => {
+    async function fetchRooms() {
+      const res = await fetch("http://localhost:4000/rooms");
+      const data = await res.json();
+      console.log(data.rooms);
+      setRooms(data.rooms);
+    }
+    fetchRooms();
+  }, []);
+
   return (
     <div>
       <Card sx={{ marginTop: 5 }} raised>
@@ -26,17 +36,26 @@ function Header({ socket }) {
           <Link style={{ textDecoration: "none" }} to="/">
             <Button variant="text">Home</Button>
           </Link>
-
           <Button variant="text" onClick={createNewRoom}>
             New Room
           </Button>
         </Box>
       </Card>
-      {/* <Box>
-        {rooms.map((room) => {
-          <Button>{room}</Button>;
-        })}
-      </Box> */}
+      <Card sx={{ marginTop: 5 }} raised>
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          {rooms.map((room) => {
+            return (
+              <Link
+                style={{ textDecoration: "none" }}
+                to={`/room/${room.name}`}
+                key={room._id}
+              >
+                <Button variant="text">{room.name}</Button>
+              </Link>
+            );
+          })}
+        </Box>
+      </Card>
     </div>
   );
 }
